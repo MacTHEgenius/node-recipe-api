@@ -1,0 +1,5 @@
+# Node ignores file
+node_modules/
+
+# Mongo ignores file
+data/
