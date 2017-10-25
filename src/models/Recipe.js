@@ -10,8 +10,15 @@ var recipeSchema = new Schema({
     updated_at: Date
 });
 
-recipeSchema.post('findOneAndRemove', (recipe) => {
+recipeSchema.post('findOneAndRemove', (error, recipe, next) => {
+    if (error) next(error);
     Ingredient.remove({ "recipe": recipe._id }).exec();
+});
+
+recipeSchema.post('findOneAndUpdate', (error, recipe, next) => {
+    if (error) next(error);
+    recipe.updated_at = Date.now();
+    recipe.save();
 });
 
 var Recipe = mongoose.model('Recipe', recipeSchema);

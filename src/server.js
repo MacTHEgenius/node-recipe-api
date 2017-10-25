@@ -4,6 +4,8 @@ var server = express();
 var bodyParser = require("body-parser");
 const { ObjectId } = require('mongodb');
 
+const { errorMessage } = require('./helpers/errorsHelpers');
+
 // DB
 var { mongoose } = require('./db/mongoose');
 var Recipe = require('./models/Recipe');
@@ -34,30 +36,36 @@ server.get('/recipes', (req, res) => {
 });
 
 server.post('/recipe', (req, res) => {
-    var recipe = new Recipe({ name: req.body.name, description: req.body.description });
+    const recipe = new Recipe({name: req.body.name, description: req.body.description});
     recipe.save()
-          .then((doc) => res.status(201).send(doc), (e) => res.status(400).send(e));
+        .then((doc) => res.status(201).send(doc), (e) => {
+            const errors = errorMessage(e);
+            res.status(400).send(errors);
+        });
 });
 
 server.patch('/recipe/:id', (req, res) => {
-    var id = req.params.id;
-    if (!ObjectId.isValid(id)) return res.sendStatus(404);
+    const id = req.params.id;
+    const newAttributes = req.body;
 
-    Recipe.findByIdAndUpdate(id)
+    if (!ObjectId.isValid(id)) return res.status(404).send({ error: "Recipe not found." }); // TODO: Duplicated code
+
+    Recipe.findByIdAndUpdate(id, { $set: newAttributes }, { new: true })
           .then((recipe) => {
-              if (!recipe) return res.sendStatus(404);
-              res.send(recipe);
+              if (!recipe) return res.status(404).send({ error: "Recipe not found." });
+              res.status(200).send(recipe);
           })
-          .catch((e) => res.sendStatus(404));
+          .catch((e) => res.status(400).send({ error: "Recipe not found." }));
 });
 
 server.delete('/recipe/:id', (req, res) => {
-    var id = req.params.id;
-    if (!ObjectId.isValid(id)) return res.sendStatus(404);
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) return res.status(404).send({ error: "Recipe not found." }); // TODO: Duplicated code
 
     Recipe.findByIdAndRemove(id)
           .then((recipe) => {
-              if (!recipe) return res.sendStatus(404);
+              if (!recipe) return res.status(404).send({ error: "Recipe not found." });
               res.send(recipe);
           }, (e) => res.status(404).send({ error: "Recipe not found." }))
           .catch((e) => res.sendStatus(404));
