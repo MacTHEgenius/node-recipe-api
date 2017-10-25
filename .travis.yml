@@ -12,3 +12,6 @@ branches:
   only:
     - master
     - develop
+
+notifications:
+  slack: macthegenius:wPfGknFpTBDKixcoTA8EHeA7
