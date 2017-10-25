@@ -4,7 +4,7 @@ var server = express();
 var bodyParser = require("body-parser");
 const { ObjectId } = require('mongodb');
 
-const { errorMessage } = require('./helpers/errorsHelpers');
+const recipeController = require('./controllers/recipeController');
 
 // DB
 var { mongoose } = require('./db/mongoose');
@@ -29,47 +29,13 @@ server.get('/', (req, res) => {
 
 // Recipes
 
-server.get('/recipes', (req, res) => {
-    // TODO: Filter params __v
-    Recipe.find()
-          .then((recipes) => res.status(200).send(recipes), (e) => res.status(400).send(e));
-});
+server.get('/recipes', recipeController.getAll);
 
-server.post('/recipe', (req, res) => {
-    const recipe = new Recipe({name: req.body.name, description: req.body.description});
-    recipe.save()
-        .then((doc) => res.status(201).send(doc), (e) => {
-            const errors = errorMessage(e);
-            res.status(400).send(errors);
-        });
-});
+server.post('/recipe', recipeController.create);
 
-server.patch('/recipe/:id', (req, res) => {
-    const id = req.params.id;
-    const newAttributes = req.body;
+server.patch('/recipe/:id', recipeController.update);
 
-    if (!ObjectId.isValid(id)) return res.status(404).send({ error: "Recipe not found." }); // TODO: Duplicated code
-
-    Recipe.findByIdAndUpdate(id, { $set: newAttributes }, { new: true })
-          .then((recipe) => {
-              if (!recipe) return res.status(404).send({ error: "Recipe not found." });
-              res.status(200).send(recipe);
-          })
-          .catch((e) => res.status(400).send({ error: "Recipe not found." }));
-});
-
-server.delete('/recipe/:id', (req, res) => {
-    const id = req.params.id;
-
-    if (!ObjectId.isValid(id)) return res.status(404).send({ error: "Recipe not found." }); // TODO: Duplicated code
-
-    Recipe.findByIdAndRemove(id)
-          .then((recipe) => {
-              if (!recipe) return res.status(404).send({ error: "Recipe not found." });
-              res.send(recipe);
-          }, (e) => res.status(404).send({ error: "Recipe not found." }))
-          .catch((e) => res.sendStatus(404));
-});
+server.delete('/recipe/:id', recipeController.remove);
 
 // Ingredients
 
