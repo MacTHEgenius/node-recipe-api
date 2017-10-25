@@ -1,5 +1,7 @@
 # Recipe API [![Build Status](https://travis-ci.org/MacTHEgenius/node-recipe-api.svg?branch=master)](https://travis-ci.org/MacTHEgenius/node-recipe-api)
 
+Wow !
+
 ## Mongo DB
 To start the DB
 ```bash
