@@ -3,3 +3,6 @@ node_modules/
 
 # Mongo ignores file
 data/
+
+# Idea ignored file
+idea/
