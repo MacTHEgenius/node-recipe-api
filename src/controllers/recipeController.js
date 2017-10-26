@@ -11,8 +11,10 @@ let getAll = (req, res) => {
 
 let create = (req, res) => {
     const recipe = new Recipe({name: req.body.name, description: req.body.description});
+
     recipe.save()
-        .then((doc) => res.status(201).send(doc), (e) => {
+        .then((doc) => res.status(201).send(doc),
+        (e) => {
             const errors = errorMessage(e);
             res.status(400).send(errors);
         });
@@ -22,28 +24,38 @@ let update = (req, res) => {
     const id = req.params.id;
     const newAttributes = req.body;
 
-    if (!ObjectId.isValid(id)) return res.status(404).send({ error: "Recipe not found." }); // TODO: Duplicated code
+    if (!ObjectId.isValid(id)) return sendError(res);
 
     Recipe.findByIdAndUpdate(id, { $set: newAttributes }, { new: true })
         .then((recipe) => {
-            if (!recipe) return res.status(404).send({ error: "Recipe not found." });
+            if (!recipe) return sendError(res);
             res.status(200).send(recipe);
         })
-        .catch((e) => res.status(400).send({ error: "Recipe not found." }));
+        .catch((e) => sendError(res));
 };
 
 let remove = (req, res) => {
     const id = req.params.id;
 
-    if (!ObjectId.isValid(id)) return res.status(404).send({ error: "Recipe not found." }); // TODO: Duplicated code
+    if (!ObjectId.isValid(id)) return sendError(res);
 
     Recipe.findByIdAndRemove(id)
         .then((recipe) => {
-            if (!recipe) return res.status(404).send({ error: "Recipe not found." });
-            res.send(recipe);
-        }, (e) => res.status(404).send({ error: "Recipe not found." }))
-        .catch((e) => res.sendStatus(404));
+            if (!recipe) return sendError(res);
+            res.status(200).send(recipe);
+        }, (e) => sendError(res))
+        .catch((e) => sendError(res));
 };
+
+function sendDoc(res, doc, created=false) {
+    if (created) res.status(201).send(doc);
+    res.status(200).send(doc);
+}
+
+function sendError(res, errors=undefined) {
+    if (errors) res.status(400).send(errors);
+    return res.status(404).send({ error: "Recipe not found." });
+}
 
 
 module.exports = {
