@@ -40,14 +40,19 @@ server.delete('/recipe/:id', recipeController.remove);
 // Ingredients
 
 server.get('/ingredients', (req, res) => {
-    Ingredient.find().then((ingredients) => res.send(ingredients));
+    Ingredient.find().then((ingredients) => res.status(200).send(ingredients));
 });
 
 server.get('/recipe/ingredients/:recipe_id', (req, res) => {
-    var recipeId = req.params.recipe_id;
+    const recipeId = req.params.recipe_id;
+
+    if (!ObjectId.isValid(recipeId)) return res.status(404).send({ error: "Recipe not found." });
+
     Ingredient.find({ recipe: recipeId })
-              .then((ingredients) => res.send(ingredients))
-              .catch((e) => res.status(400).send(e));
+        .then((ingredients) => {
+            res.status(200).send(ingredients);
+        })
+        .catch((e) => res.status(500).send(e));
 });
 
 server.post('/recipe/ingredient/:recipe_id', (req, res) => {
