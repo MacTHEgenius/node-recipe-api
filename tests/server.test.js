@@ -211,16 +211,170 @@ describe('Ingredients tests', () => {
                 .end(done);
         });
 
-        it('should not get ingredients recipe, returns a not found error with a valid id and non-existing recipe', (done) => {
+        it('should not get empty array with a valid id and non-existing recipe', (done) => {
             const VALID_ID = new ObjectID();
 
             request(server)
                 .get(`/recipe/ingredients/${VALID_ID}`)
-                .expect(404)
-                .expect((res) => expect(res.body.error).toBe("Recipe not found."))
+                .expect(200)
+                .expect((res) => expect(res.body.length).toBe(0))
                 .end(done);
         });
 
     });
+
+    describe('POST /recipe/ingredient/:recipe_id', () => {
+
+        const RECIPE = RECIPES[0];
+        const NEW_POSTED_INGREDIENT = { name: "oil", count: 1, measure: "tablespoon" };
+
+        it('should add a new ingredient', (done) => {
+            request(server)
+                .post(`/recipe/ingredient/${RECIPE._id}`)
+                .send(NEW_POSTED_INGREDIENT)
+                .expect(201)
+                .expect((res) => {
+                    expect(res.body.name).toBe(NEW_POSTED_INGREDIENT.name);
+                    expect(res.body.count).toBe(NEW_POSTED_INGREDIENT.count);
+                    expect(res.body.measure).toBe(NEW_POSTED_INGREDIENT.measure);
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
+                        .then((ingredientsFound) => {
+                            const ingredient = ingredientsFound[0];
+                            expect(ingredient.name).toBe(NEW_POSTED_INGREDIENT.name);
+                            expect(ingredient.count).toBe(NEW_POSTED_INGREDIENT.count);
+                            expect(ingredient.measure).toBe(NEW_POSTED_INGREDIENT.measure);
+                            done();
+                        })
+                        .catch((e) =>  done(e));
+                })
+        });
+
+        it('should assign ingredient to a recipe', (done) => {
+            request(server)
+                .post(`/recipe/ingredient/${RECIPE._id}`)
+                .send(NEW_POSTED_INGREDIENT)
+                .expect(201)
+                .expect((res) => {
+                    expect(res.body.recipe._id).toBe(`${RECIPE._id}`);
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
+                        .then((ingredientFound) => {
+                            expect(`${ingredientFound[0].recipe}`).toBe(`${RECIPE._id}`);
+                            done();
+                        })
+                        .catch((e) =>  done(e));
+                })
+        });
+
+        it('should not add ingredient with missing name', (done) => {
+            request(server)
+                .post(`/recipe/ingredient/${RECIPE._id}`)
+                .send({ count: NEW_POSTED_INGREDIENT.count, measure: NEW_POSTED_INGREDIENT.measure })
+                .expect(422)
+                .expect((res) => {
+                    expect(res.body.error).toBe("Path `name` is required.");
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
+                        .then((ingredientsFound) => {
+                            expect(ingredientsFound.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) =>  done(e));
+                })
+        });
+
+        it('should not add ingredient with missing count', (done) => {
+            request(server)
+                .post(`/recipe/ingredient/${RECIPE._id}`)
+                .send({ name: NEW_POSTED_INGREDIENT.name, measure: NEW_POSTED_INGREDIENT.measure })
+                .expect(422)
+                .expect((res) => {
+                    expect(res.body.error).toBe("Path `count` is required.");
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
+                        .then((ingredientsFound) => {
+                            expect(ingredientsFound.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) =>  done(e));
+                })
+        });
+
+        it('should not add ingredient with missing measure', (done) => {
+            request(server)
+                .post(`/recipe/ingredient/${RECIPE._id}`)
+                .send({ count: NEW_POSTED_INGREDIENT.count, name: NEW_POSTED_INGREDIENT.name })
+                .expect(422)
+                .expect((res) => {
+                    expect(res.body.error).toBe("Path `measure` is required.");
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
+                        .then((ingredientsFound) => {
+                            expect(ingredientsFound.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) =>  done(e));
+                })
+        });
+
+        it('should not add ingredient with invalid recipe id', (done) => {
+            request(server)
+                .post(`/recipe/ingredient/1`)
+                .send(NEW_POSTED_INGREDIENT)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.error).toBe("Recipe not found.");
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
+                        .then((ingredientsFound) => {
+                            expect(ingredientsFound.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) =>  done(e));
+                })
+        });
+
+        it('should not add ingredient with valid recipe id but non-existing one', (done) => {
+            const VALID_ID = new ObjectID();
+
+            request(server)
+                .post(`/recipe/ingredient/${VALID_ID}`)
+                .send(NEW_POSTED_INGREDIENT)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.error).toBe("Recipe not found.");
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
+                        .then((ingredientsFound) => {
+                            expect(ingredientsFound.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) =>  done(e));
+                })
+        });
+
+    })
 
 });
