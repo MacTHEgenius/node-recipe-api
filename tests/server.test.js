@@ -13,9 +13,9 @@ const RECIPES = [
 ];
 
 const INGREDIENTS = [
-    {name: "flour", count: 2, measure: "cup", recipe: RECIPES[0]._id},
-    {name: "cocoa", count: 3, measure: "tablespoon", recipe: RECIPES[0]._id},
-    {name: "potato", count: 4, measure: "item", recipe: RECIPES[1]._id},
+    {_id: new ObjectID(), name: "flour", count: 2, measure: "cup", recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), name: "cocoa", count: 3, measure: "tablespoon", recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), name: "potato", count: 4, measure: "item", recipe: RECIPES[1]._id},
 ];
 
 beforeEach((done) => {
@@ -79,7 +79,7 @@ describe('Recipes tests', () => {
                 .send({description: NEW_POSTED_RECIPE.description})
                 .expect(400)
                 .expect((res) => {
-                    expect(res.body.error).toBe('Path `name` is required.')
+                    expect(res.body.errors[0]).toBe('Path `name` is required.')
                 })
                 .end(done);
         })
@@ -234,9 +234,10 @@ describe('Ingredients tests', () => {
                 .send(NEW_POSTED_INGREDIENT)
                 .expect(201)
                 .expect((res) => {
-                    expect(res.body.name).toBe(NEW_POSTED_INGREDIENT.name);
-                    expect(res.body.count).toBe(NEW_POSTED_INGREDIENT.count);
-                    expect(res.body.measure).toBe(NEW_POSTED_INGREDIENT.measure);
+                    expect(res.body.message).toBe("Ingredient successfully created.");
+                    expect(res.body.ingredient.name).toBe(NEW_POSTED_INGREDIENT.name);
+                    expect(res.body.ingredient.count).toBe(NEW_POSTED_INGREDIENT.count);
+                    expect(res.body.ingredient.measure).toBe(NEW_POSTED_INGREDIENT.measure);
                 })
                 .end((error, res) => {
                     if (error) return done(error);
@@ -259,7 +260,7 @@ describe('Ingredients tests', () => {
                 .send(NEW_POSTED_INGREDIENT)
                 .expect(201)
                 .expect((res) => {
-                    expect(res.body.recipe._id).toBe(`${RECIPE._id}`);
+                    expect(res.body.ingredient.recipe._id).toBe(`${RECIPE._id}`);
                 })
                 .end((error, res) => {
                     if (error) return done(error);
@@ -279,7 +280,10 @@ describe('Ingredients tests', () => {
                 .send({ count: NEW_POSTED_INGREDIENT.count, measure: NEW_POSTED_INGREDIENT.measure })
                 .expect(422)
                 .expect((res) => {
-                    expect(res.body.error).toBe("Path `name` is required.");
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.errors.length).toBe(1);
+                    expect(res.body.errors[0]).toBe("Path `name` is required.");
+                    expect(res.body.message).toBe("There were some errors.");
                 })
                 .end((error, res) => {
                     if (error) return done(error);
@@ -299,7 +303,10 @@ describe('Ingredients tests', () => {
                 .send({ name: NEW_POSTED_INGREDIENT.name, measure: NEW_POSTED_INGREDIENT.measure })
                 .expect(422)
                 .expect((res) => {
-                    expect(res.body.error).toBe("Path `count` is required.");
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.errors.length).toBe(1);
+                    expect(res.body.errors[0]).toBe("Path `count` is required.");
+                    expect(res.body.message).toBe("There were some errors.");
                 })
                 .end((error, res) => {
                     if (error) return done(error);
@@ -319,7 +326,10 @@ describe('Ingredients tests', () => {
                 .send({ count: NEW_POSTED_INGREDIENT.count, name: NEW_POSTED_INGREDIENT.name })
                 .expect(422)
                 .expect((res) => {
-                    expect(res.body.error).toBe("Path `measure` is required.");
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.errors.length).toBe(1);
+                    expect(res.body.errors[0]).toBe("Path `measure` is required.");
+                    expect(res.body.message).toBe("There were some errors.");
                 })
                 .end((error, res) => {
                     if (error) return done(error);
@@ -339,9 +349,10 @@ describe('Ingredients tests', () => {
                 .send(NEW_POSTED_INGREDIENT)
                 .expect(404)
                 .expect((res) => {
-                    expect(res.body.error).toBe("Recipe not found.");
+                    expect(res.body.message).toBe("Recipe not found.");
+                    expect(res.body.error).toBe(true);
                 })
-                .end((error, res) => {
+                .end((error) => {
                     if (error) return done(error);
 
                     Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
@@ -361,9 +372,10 @@ describe('Ingredients tests', () => {
                 .send(NEW_POSTED_INGREDIENT)
                 .expect(404)
                 .expect((res) => {
-                    expect(res.body.error).toBe("Recipe not found.");
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.message).toBe("Recipe not found.");
                 })
-                .end((error, res) => {
+                .end((error) => {
                     if (error) return done(error);
 
                     Ingredient.find({ name: NEW_POSTED_INGREDIENT.name })
@@ -375,6 +387,56 @@ describe('Ingredients tests', () => {
                 })
         });
 
-    })
+    });
+
+    describe('DELETE /recipe/ingredients/:ingredient_id', (req, res) => {
+
+        const INGREDIENT = INGREDIENTS[0];
+
+        it('should delete ingredient', (done) => {
+            request(server)
+                .delete(`/recipe/ingredients/${ INGREDIENT._id }`)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Ingredient successfully deleted.");
+                    expect(res.body.ingredient).toBe(`${INGREDIENT._id}`);
+                })
+                .end((error, res) => {
+                    if (error) return done(error);
+
+                    Ingredient.find({ name: INGREDIENT.name })
+                        .then((ingredientsFound) => {
+                            expect(ingredientsFound.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) => done(error));
+                });
+        });
+
+        it('should not delete ingredient with invalid id', (done) => {
+            request(server)
+                .delete(`/recipe/ingredients/1`)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.message).toBe("Ingredient not found.");
+                })
+                .end(done);
+        });
+
+        it('should not delete ingredient with valid id and non-existence id', (done) => {
+            const VALID_ID = new ObjectID();
+
+            request(server)
+                .delete(`/recipe/ingredients/${VALID_ID}`)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.message).toBe("Ingredient not found.");
+                })
+                .end(done);
+        });
+
+    });
 
 });
