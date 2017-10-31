@@ -1,7 +1,7 @@
 const Recipe = require('./../models/Recipe');
 
 const { ObjectId } = require('mongodb');
-const { errorMessage } = require('./../helpers/errorsHelpers');
+const { errorMessages } = require('./../helpers/errorsHelpers');
 
 let getAll = (req, res) => {
     // TODO: Filter params __v
@@ -15,7 +15,7 @@ let create = (req, res) => {
     recipe.save()
         .then((doc) => res.status(201).send(doc),
         (e) => {
-            const errors = errorMessage(e);
+            const errors = errorMessages(e);
             res.status(400).send(errors);
         });
 };
