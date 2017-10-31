@@ -3,7 +3,7 @@ const Ingredient = require('./Ingredient');
 
 const Schema = mongoose.Schema;
 
-var recipeSchema = new Schema({
+const recipeSchema = new Schema({
     name: { type: String, required: true, minLength: 1, maxLength: 30, trim: true },
     description: String,
     created_at: { type: Date, default: Date.now },
@@ -21,6 +21,6 @@ recipeSchema.post('findOneAndUpdate', (error, recipe, next) => {
     recipe.save();
 });
 
-var Recipe = mongoose.model('Recipe', recipeSchema);
+const Recipe = mongoose.model('Recipe', recipeSchema);
 
 module.exports = Recipe;

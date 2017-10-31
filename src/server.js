@@ -5,6 +5,7 @@ var bodyParser = require("body-parser");
 const { ObjectId } = require('mongodb');
 
 const recipeController = require('./controllers/recipeController');
+const { errorMessages } = require('./helpers/errorsHelpers');
 
 // DB
 var { mongoose } = require('./db/mongoose');
@@ -40,44 +41,95 @@ server.delete('/recipe/:id', recipeController.remove);
 // Ingredients
 
 server.get('/ingredients', (req, res) => {
-    Ingredient.find().then((ingredients) => res.send(ingredients));
+    Ingredient.find()
+        .then((ingredients) => res.status(200).send(ingredients))
+        .catch((e) => res.status(500).send(e));
 });
 
 server.get('/recipe/ingredients/:recipe_id', (req, res) => {
-    var recipeId = req.params.recipe_id;
+    const recipeId = req.params.recipe_id;
+
+    if (!ObjectId.isValid(recipeId)) return res.status(404).send({ error: "Recipe not found." });
+
     Ingredient.find({ recipe: recipeId })
-              .then((ingredients) => res.send(ingredients))
-              .catch((e) => res.status(400).send(e));
+        .then((ingredients) => {
+            res.status(200).send(ingredients);
+        })
+        .catch((e) => res.status(500).send(e));
 });
 
 server.post('/recipe/ingredient/:recipe_id', (req, res) => {
-    var recipeId = req.params.recipe_id;
-    var data = req.body;
-    if (!ObjectId.isValid(recipeId)) return res.sendStatus(404);
+    const recipeId = req.params.recipe_id;
+    const data = req.body;
+
+    if (!ObjectId.isValid(recipeId)) {
+        let response = {
+            message: "Recipe not found.", error: true
+        };
+        return res.status(404).send(response);
+    }
     
     Recipe.findById(recipeId)
-          .then((recipe) => {
-              if (!recipe) return res.status(404).send({ error: "Recipe not found." });
+        .then((recipe) => {
 
-              var ingredientToAdd = new Ingredient({ name: data.name, count: data.count, measure: data.measure });
-              ingredientToAdd.recipe = recipe;
-              ingredientToAdd.save()
-                        .then((ingredient) => res.send(ingredient), (e) => res.status(400).send(e))
-                        .catch((e) => res.send(e));
-          }, (e) => res.status(404).send({ error: "Recipe not found." }))
-          .catch((e) => res.send(e));
+            if (recipe) {
+                const ingredientToAdd = new Ingredient(data);
+                ingredientToAdd.recipe = recipe;
+                ingredientToAdd.save()
+                    .then((ingredient) => {
+                        let response = {
+                            message: "Ingredient successfully created.", ingredient: ingredient
+                        };
+                        res.status(201).send(response);
+                    })
+                    .catch((e) => {
+                        let response = {
+                            message: "There were some errors.", error: true,
+                            errors: errorMessages(e).errors // TODO: just the array.
+                        };
+                        res.status(422).send(response);
+                    });
+            } else {
+                let response = {
+                    message: "Recipe not found.", error: true
+                };
+                res.status(404).send(response);
+            }
+
+        })
+        .catch((e) => res.status(500).send(e));
 });
 
 server.delete('/recipe/ingredients/:ingredient_id', (req, res) => {
     var ingredientId = req.params.ingredient_id;
-    if (!ObjectId.isValid(ingredientId)) return res.sendStatus(404);
+    if (!ObjectId.isValid(ingredientId)) {
+        let response = {
+            message: "Ingredient not found.",
+            error: true
+        };
+        return res.status(404).send(response);
+    }
 
     Ingredient.findByIdAndRemove(ingredientId)
-              .then((ingredient) => {
-                  if (!ingredient) return res.sendStatus(404);
-                  res.sendStatus(200);
-              }, (e) => res.status(404).send({ error: "Ingredient not found." }))
-              .catch((e) => res.send(e));
+        .then((ingredient) => {
+            if (ingredient) {
+                let response = {
+                    message: "Ingredient successfully deleted.",
+                    ingredient: ingredient._id
+                };
+                res.status(200).send(response);
+            } else {
+                let response = {
+                    message: "Ingredient not found.",
+                    error: true
+                };
+                res.status(404).send(response);
+            }
+        })
+        .catch((e) => {
+            console.log(e);
+            res.status(500).send(e);
+        });
 });
 
 // Listening
