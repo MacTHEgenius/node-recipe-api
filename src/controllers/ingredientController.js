@@ -66,6 +66,10 @@ let create = (req, res) => {
         .catch((e) => res.status(500).send(e));
 };
 
+let update = (req, res) => {
+
+};
+
 let remove = (req, res) => {
     var ingredientId = req.params.ingredient_id;
     if (!ObjectId.isValid(ingredientId)) {
@@ -100,5 +104,5 @@ let remove = (req, res) => {
 
 
 module.exports = {
-    getAll, getIngredientFromRecipe, create, remove
+    getAll, getIngredientFromRecipe, create, update, remove
 };

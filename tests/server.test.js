@@ -398,7 +398,7 @@ describe('Ingredients tests', () => {
 
         it('should update ingredient name', (done) => {
             request(server)
-                .patch(`/recipe/ingredient/${ INGREDIENTS._id }`)
+                .patch(`/ingredient/${ INGREDIENTS._id }`)
                 .send(NEW_NAME)
                 .expect(200)
                 .expect((res) => {
@@ -420,7 +420,7 @@ describe('Ingredients tests', () => {
 
         it('should update ingredient count', (done) => {
             request(server)
-                .patch(`/recipe/ingredient/${ INGREDIENTS._id }`)
+                .patch(`/ingredient/${ INGREDIENTS._id }`)
                 .send(NEW_COUNT)
                 .expect(200)
                 .expect((res) => {
@@ -442,7 +442,7 @@ describe('Ingredients tests', () => {
 
         it('should update ingredient measure', (done) => {
             request(server)
-                .patch(`/recipe/ingredient/${ INGREDIENTS._id }`)
+                .patch(`/ingredient/${ INGREDIENTS._id }`)
                 .send(NEW_MEASURE)
                 .expect(200)
                 .expect((res) => {
@@ -464,7 +464,7 @@ describe('Ingredients tests', () => {
 
         it('should not update with invalid id', (done) => {
             request(server)
-                .patch(`/recipe/ingredient/1`)
+                .patch(`/ingredient/1`)
                 .send(NEW_NAME)
                 .expect(404)
                 .expect((res) => {
@@ -487,7 +487,7 @@ describe('Ingredients tests', () => {
             const VALID_ID = new ObjectID();
 
             request(server)
-                .patch(`/recipe/ingredient/${ VALID_ID }`)
+                .patch(`/ingredient/${ VALID_ID }`)
                 .send(NEW_NAME)
                 .expect(404)
                 .expect((res) => {
