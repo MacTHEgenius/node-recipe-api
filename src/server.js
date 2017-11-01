@@ -28,21 +28,15 @@ server.get('/', (req, res) => {
 // Recipes
 
 server.get('/recipes', recipeController.getAll);
-
 server.post('/recipe', recipeController.create);
-
 server.patch('/recipe/:id', recipeController.update);
-
 server.delete('/recipe/:id', recipeController.remove);
 
 // Ingredients
 
 server.get('/ingredients', ingredientController.getAll);
-
 server.get('/recipe/ingredients/:recipe_id', ingredientController.getIngredientFromRecipe);
-
 server.post('/recipe/ingredient/:recipe_id', ingredientController.create);
-
 server.delete('/recipe/ingredients/:ingredient_id', ingredientController.remove);
 
 // Listening
