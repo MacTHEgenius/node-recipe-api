@@ -35,10 +35,11 @@ server.delete('/recipe/:id', recipeController.remove);
 // Ingredients
 
 server.get('/ingredients', ingredientController.getAll);
+server.patch('/ingredient/:id', ingredientController.update);
+server.delete('/ingredient/:id', ingredientController.remove);
+
 server.get('/recipe/ingredients/:recipe_id', ingredientController.getIngredientFromRecipe);
 server.post('/recipe/ingredient/:recipe_id', ingredientController.create);
-server.patch('/ingredient/:id', ingredientController.update);
-server.delete('/recipe/ingredients/:ingredient_id', ingredientController.remove);
 
 // Listening
 server.listen(port, ip, () => {

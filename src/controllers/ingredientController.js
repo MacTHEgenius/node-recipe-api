@@ -15,7 +15,12 @@ let getAll = (req, res) => {
 let getIngredientFromRecipe = (req, res) => {
     const recipeId = req.params.recipe_id;
 
-    if (!ObjectId.isValid(recipeId)) return res.status(404).send({ error: "Recipe not found." });
+    if (!ObjectId.isValid(recipeId)) {
+        let response = {
+            message: "Recipe not found.", error: true
+        };
+        return res.status(404).send(response);
+    }
 
     Ingredient.find({ recipe: recipeId })
         .then((ingredients) => {
@@ -96,7 +101,8 @@ let update = (req, res) => {
 };
 
 let remove = (req, res) => {
-    var ingredientId = req.params.ingredient_id;
+    const ingredientId = req.params.id;
+
     if (!ObjectId.isValid(ingredientId)) {
         let response = {
             message: "Ingredient not found.",

@@ -207,11 +207,14 @@ describe('Ingredients tests', () => {
             request(server)
                 .get('/recipe/ingredients/1')
                 .expect(404)
-                .expect((res) => expect(res.body.error).toBe("Recipe not found."))
+                .expect((res) => {
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.message).toBe("Recipe not found.")
+                })
                 .end(done);
         });
 
-        it('should not get empty array with a valid id and non-existing recipe', (done) => {
+        it('should get empty array with a valid id and non-existing recipe', (done) => {
             const VALID_ID = new ObjectID();
 
             request(server)
@@ -389,7 +392,7 @@ describe('Ingredients tests', () => {
 
     });
 
-    describe('PATCH /recipe/ingredient/ingredient_id', () => {
+    describe('PATCH /ingredient/:id', () => {
 
         const INGREDIENT = INGREDIENTS[0];
         const NEW_NAME = { name: "An updated name" };
@@ -508,13 +511,13 @@ describe('Ingredients tests', () => {
 
     });
 
-    describe('DELETE /recipe/ingredients/:ingredient_id', (req, res) => {
+    describe('DELETE /ingredient/:id', (req, res) => {
 
         const INGREDIENT = INGREDIENTS[0];
 
         it('should delete ingredient', (done) => {
             request(server)
-                .delete(`/recipe/ingredients/${ INGREDIENT._id }`)
+                .delete(`/ingredient/${ INGREDIENT._id }`)
                 .expect(200)
                 .expect((res) => {
                     expect(res.body.message).toBe("Ingredient successfully deleted.");
@@ -534,7 +537,7 @@ describe('Ingredients tests', () => {
 
         it('should not delete ingredient with invalid id', (done) => {
             request(server)
-                .delete(`/recipe/ingredients/1`)
+                .delete(`/ingredient/1`)
                 .expect(404)
                 .expect((res) => {
                     expect(res.body.error).toBe(true);
@@ -547,7 +550,7 @@ describe('Ingredients tests', () => {
             const VALID_ID = new ObjectID();
 
             request(server)
-                .delete(`/recipe/ingredients/${VALID_ID}`)
+                .delete(`/ingredient/${VALID_ID}`)
                 .expect(404)
                 .expect((res) => {
                     expect(res.body.error).toBe(true);
