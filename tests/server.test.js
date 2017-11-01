@@ -398,12 +398,12 @@ describe('Ingredients tests', () => {
 
         it('should update ingredient name', (done) => {
             request(server)
-                .patch(`/ingredient/${ INGREDIENTS._id }`)
+                .patch(`/ingredient/${ INGREDIENT._id }`)
                 .send(NEW_NAME)
                 .expect(200)
                 .expect((res) => {
                     expect(res.body.message).toBe("Ingredient successfully updated.");
-                    expect(res.body.ingredient.id).toBe(INGREDIENT._id);
+                    expect(res.body.ingredient._id).toBe(`${INGREDIENT._id}`);
                     expect(res.body.ingredient.name).toBe(NEW_NAME.name);
                 })
                 .end((error) => {
@@ -420,12 +420,12 @@ describe('Ingredients tests', () => {
 
         it('should update ingredient count', (done) => {
             request(server)
-                .patch(`/ingredient/${ INGREDIENTS._id }`)
+                .patch(`/ingredient/${ INGREDIENT._id }`)
                 .send(NEW_COUNT)
                 .expect(200)
                 .expect((res) => {
                     expect(res.body.message).toBe("Ingredient successfully updated.");
-                    expect(res.body.ingredient.id).toBe(INGREDIENT._id);
+                    expect(res.body.ingredient._id).toBe(`${INGREDIENT._id}`);
                     expect(res.body.ingredient.count).toBe(NEW_COUNT.count);
                 })
                 .end((error) => {
@@ -442,12 +442,12 @@ describe('Ingredients tests', () => {
 
         it('should update ingredient measure', (done) => {
             request(server)
-                .patch(`/ingredient/${ INGREDIENTS._id }`)
+                .patch(`/ingredient/${ INGREDIENT._id }`)
                 .send(NEW_MEASURE)
                 .expect(200)
                 .expect((res) => {
                     expect(res.body.message).toBe("Ingredient successfully updated.");
-                    expect(res.body.ingredient.id).toBe(INGREDIENT._id);
+                    expect(res.body.ingredient._id).toBe(`${INGREDIENT._id}`);
                     expect(res.body.ingredient.measure).toBe(NEW_MEASURE.measure);
                 })
                 .end((error) => {
@@ -469,7 +469,7 @@ describe('Ingredients tests', () => {
                 .expect(404)
                 .expect((res) => {
                     expect(res.body.error).toBe(true);
-                    expect(res.body.message).toBe("Ingredient not found");
+                    expect(res.body.message).toBe("Ingredient not found.");
                 })
                 .end((error) => {
                     if (error) return done(error);
@@ -492,7 +492,7 @@ describe('Ingredients tests', () => {
                 .expect(404)
                 .expect((res) => {
                     expect(res.body.error).toBe(true);
-                    expect(res.body.message).toBe("Ingredient not found");
+                    expect(res.body.message).toBe("Ingredient not found.");
                 })
                 .end((error) => {
                     if (error) return done(error);

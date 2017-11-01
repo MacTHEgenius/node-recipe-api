@@ -37,7 +37,7 @@ server.delete('/recipe/:id', recipeController.remove);
 server.get('/ingredients', ingredientController.getAll);
 server.get('/recipe/ingredients/:recipe_id', ingredientController.getIngredientFromRecipe);
 server.post('/recipe/ingredient/:recipe_id', ingredientController.create);
-server.patch('/ingredient/:ingredient_id', ingredientController.update);
+server.patch('/ingredient/:id', ingredientController.update);
 server.delete('/recipe/ingredients/:ingredient_id', ingredientController.remove);
 
 // Listening
