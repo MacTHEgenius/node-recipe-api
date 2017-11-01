@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
+
 const Ingredient = require('./Ingredient');
+const Step = require('./Step');
 
 const Schema = mongoose.Schema;
 
@@ -13,6 +15,7 @@ const recipeSchema = new Schema({
 recipeSchema.post('findOneAndRemove', (error, recipe, next) => {
     if (error) next(error);
     Ingredient.remove({ "recipe": recipe._id }).exec();
+    Step.remove({ recipe: recipe._id }).exec();
 });
 
 recipeSchema.post('findOneAndUpdate', (error, recipe, next) => {
