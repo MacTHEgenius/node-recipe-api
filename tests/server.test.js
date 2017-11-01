@@ -169,6 +169,10 @@ describe('Recipes tests', () => {
                 });
         });
 
+        it('should delete all ingredients and steps linked', (done) => {
+            // TODO: should delete all ingredients and steps linked
+        })
+
     });
 
 });

@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const stepSchema = new Schema({
     description: { type: String, required: true },
     position: { type: String, required: true },
-    ingredients: { type: Schema.Types.ObjectId, ref: 'Ingredient' },
+    ingredients: [{ type: Schema.Types.ObjectId, ref: 'Ingredient' }],
     recipe: { type: Schema.Types.ObjectId, ref: 'Recipe' }
 });
 
