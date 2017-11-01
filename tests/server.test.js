@@ -566,3 +566,29 @@ describe('Ingredients tests', () => {
     });
 
 });
+
+/* Steps */
+
+describe('Steps tests', () => {
+
+    describe('GET /steps', () => {
+
+    });
+
+    describe('PATCH /step/:id', () => {
+
+    });
+
+    describe('DELETE /step/:id', () => {
+
+    });
+
+    describe('GET /recipe/steps/:recipe_id', () => {
+
+    });
+
+    describe('POST /recipe/step/:recipe_id', () => {
+
+    });
+
+});
