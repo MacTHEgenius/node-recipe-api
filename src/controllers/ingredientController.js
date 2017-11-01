@@ -97,6 +97,7 @@ let update = (req, res) => {
 
 let remove = (req, res) => {
     const ingredientId = req.params.id;
+
     if (!ObjectId.isValid(ingredientId)) {
         let response = {
             message: "Ingredient not found.",
