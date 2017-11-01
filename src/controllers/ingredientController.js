@@ -66,6 +66,35 @@ let create = (req, res) => {
         .catch((e) => res.status(500).send(e));
 };
 
+let update = (req, res) => {
+    const id = req.params.id;
+    const newAttributes = req.body;
+
+    if (!ObjectId.isValid(id)) {
+        let response = {
+            message: "Ingredient not found.", error: true
+        };
+        return res.status(404).send(response);
+    }
+
+    Ingredient.findByIdAndUpdate(id, { $set: newAttributes }, { new: true})
+        .then((ingredient) => {
+            if (ingredient) {
+                let response = {
+                    message: "Ingredient successfully updated.",
+                    ingredient: ingredient
+                };
+                res.status(200).send(response);
+            } else {
+                let response = {
+                    message: "Ingredient not found.", error: true
+                };
+                res.status(404).send(response);
+            }
+        })
+        .catch((e) => res.status(500).send(e));
+};
+
 let remove = (req, res) => {
     var ingredientId = req.params.ingredient_id;
     if (!ObjectId.isValid(ingredientId)) {
@@ -100,5 +129,5 @@ let remove = (req, res) => {
 
 
 module.exports = {
-    getAll, getIngredientFromRecipe, create, remove
+    getAll, getIngredientFromRecipe, create, update, remove
 };
