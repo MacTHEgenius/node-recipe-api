@@ -389,6 +389,125 @@ describe('Ingredients tests', () => {
 
     });
 
+    describe('PATCH /recipe/ingredient/ingredient_id', () => {
+
+        const INGREDIENT = INGREDIENTS[0];
+        const NEW_NAME = { name: "An updated name" };
+        const NEW_COUNT = { count: 2000 };
+        const NEW_MEASURE = { measure: "TB" };
+
+        it('should update ingredient name', (done) => {
+            request(server)
+                .patch(`/recipe/ingredient/${ INGREDIENTS._id }`)
+                .send(NEW_NAME)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Ingredient successfully updated.");
+                    expect(res.body.ingredient.id).toBe(INGREDIENT._id);
+                    expect(res.body.ingredient.name).toBe(NEW_NAME.name);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Ingredient.findById(INGREDIENT._id)
+                        .then((ingredient) => {
+                            expect(ingredient.name).toBe(NEW_NAME.name);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should update ingredient count', (done) => {
+            request(server)
+                .patch(`/recipe/ingredient/${ INGREDIENTS._id }`)
+                .send(NEW_COUNT)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Ingredient successfully updated.");
+                    expect(res.body.ingredient.id).toBe(INGREDIENT._id);
+                    expect(res.body.ingredient.count).toBe(NEW_COUNT.count);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Ingredient.findById(INGREDIENT._id)
+                        .then((ingredient) => {
+                            expect(ingredient.count).toBe(NEW_COUNT.count);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should update ingredient measure', (done) => {
+            request(server)
+                .patch(`/recipe/ingredient/${ INGREDIENTS._id }`)
+                .send(NEW_MEASURE)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Ingredient successfully updated.");
+                    expect(res.body.ingredient.id).toBe(INGREDIENT._id);
+                    expect(res.body.ingredient.measure).toBe(NEW_MEASURE.measure);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Ingredient.findById(INGREDIENT._id)
+                        .then((ingredient) => {
+                            expect(ingredient.measure).toBe(NEW_MEASURE.measure);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should not update with invalid id', (done) => {
+            request(server)
+                .patch(`/recipe/ingredient/1`)
+                .send(NEW_NAME)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.message).toBe("Ingredient not found");
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Ingredient.findById(INGREDIENT._id)
+                        .then((ingredient) => {
+                            expect(ingredient.name).toBe(INGREDIENT.name);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should not update with non-existence ingredient', (done) => {
+            const VALID_ID = new ObjectID();
+
+            request(server)
+                .patch(`/recipe/ingredient/${ VALID_ID }`)
+                .send(NEW_NAME)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.message).toBe("Ingredient not found");
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Ingredient.findById(INGREDIENT._id)
+                        .then((ingredient) => {
+                            expect(ingredient.name).toBe(INGREDIENT.name);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+    });
+
     describe('DELETE /recipe/ingredients/:ingredient_id', (req, res) => {
 
         const INGREDIENT = INGREDIENTS[0];
