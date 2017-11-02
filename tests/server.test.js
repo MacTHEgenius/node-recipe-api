@@ -5,6 +5,7 @@ const {ObjectID} = require('mongodb');
 const {server} = require('./../src/server');
 const Recipe = require('./../src/models/Recipe');
 const Ingredient = require('./../src/models/Ingredient');
+const Step = require('./../src/models/Step');
 
 const RECIPES = [
     {_id: new ObjectID(), name: "My first recipe", description: "My first description"},
@@ -18,17 +19,23 @@ const INGREDIENTS = [
     {_id: new ObjectID(), name: "potato", count: 4, measure: "item", recipe: RECIPES[1]._id},
 ];
 
+const STEPS = [
+    {_id: new ObjectID(), description: "Step 1", position: 1, ingredients: [INGREDIENTS[0]._id], recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), description: "Step 2", position: 2, ingredients: [INGREDIENTS[1]._id], recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), description: "Step 1", position: 1, ingredients: [INGREDIENTS[2]._id], recipe: RECIPES[1]._id},
+];
+
 beforeEach((done) => {
     Recipe.remove({})
-        .then(() => {
-            return Recipe.insertMany(RECIPES)
-        })
+        .then(() => { return Recipe.insertMany(RECIPES); })
         .then(() => {
             Ingredient.remove({})
+                .then(() => { return Ingredient.insertMany(INGREDIENTS); })
                 .then(() => {
-                    return Ingredient.insertMany(INGREDIENTS)
-                })
-                .then(() => done());
+                    Step.remove({})
+                        .then(() => { return Step.insertMany(STEPS); })
+                        .then(() => done());
+                });
         });
 });
 
@@ -573,6 +580,16 @@ describe('Ingredients tests', () => {
 describe('Steps tests', () => {
 
     describe('GET /steps', () => {
+
+        it('should get all steps', (done) => {
+            request(server)
+                .get('/steps')
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.length).toBe(3);
+                })
+                .end(done);
+        });
 
     });
 

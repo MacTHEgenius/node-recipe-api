@@ -5,6 +5,7 @@ var bodyParser = require("body-parser");
 
 const recipeController = require('./controllers/recipeController');
 const ingredientController = require('./controllers/ingredientController');
+const stepsController = require('./controllers/stepsController');
 
 // DB
 var { mongoose } = require('./db/mongoose');
@@ -40,6 +41,10 @@ server.delete('/ingredient/:id', ingredientController.remove);
 
 server.get('/recipe/ingredients/:recipe_id', ingredientController.getIngredientFromRecipe);
 server.post('/recipe/ingredient/:recipe_id', ingredientController.create);
+
+// Steps
+
+server.get('/steps', stepsController.getAll);
 
 // Listening
 server.listen(port, ip, () => {
