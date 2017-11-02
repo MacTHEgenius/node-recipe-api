@@ -45,6 +45,7 @@ server.post('/recipe/ingredient/:recipe_id', ingredientController.create);
 // Steps
 
 server.get('/steps', stepsController.getAll);
+server.patch('/step/:id', stepsController.update);
 
 // Listening
 server.listen(port, ip, () => {

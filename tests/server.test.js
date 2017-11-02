@@ -601,7 +601,7 @@ describe('Steps tests', () => {
 
         it('should update description', (done) => {
             request(server)
-                .patch(`/steps/${STEP._id}`)
+                .patch(`/step/${STEP._id}`)
                 .send(NEW_DESCRIPTION)
                 .expect(200)
                 .expect((res) => {
@@ -610,7 +610,7 @@ describe('Steps tests', () => {
                     expect(res.body.step.position).toBe(STEP.position);
                 })
                 .end((error) => {
-                    if (error) done(error);
+                    if (error) return done(error);
 
                     Step.findById(STEP._id)
                         .then((step) => {
@@ -624,7 +624,7 @@ describe('Steps tests', () => {
 
         it('should update position', (done) => {
             request(server)
-                .patch(`/steps/${STEP._id}`)
+                .patch(`/step/${STEP._id}`)
                 .send(NEW_POSITION)
                 .expect(200)
                 .expect((res) => {
@@ -633,7 +633,7 @@ describe('Steps tests', () => {
                     expect(res.body.step.description).toBe(STEP.description);
                 })
                 .end((error) => {
-                    if (error) done(error);
+                    if (error) return done(error);
 
                     Step.findById(STEP._id)
                         .then((step) => {
@@ -646,19 +646,40 @@ describe('Steps tests', () => {
         });
 
         it('should update step by adding one ingredient', (done) => {
+            const INGREDIENT_TO_ADD = INGREDIENTS[1]._id;
 
+            request(server)
+                .patch(`/step/${STEP._id}`)
+                .send({ add: [INGREDIENT_TO_ADD] })
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Ingredients added.");
+                    expect(res.body.ingredients[0]).toBe(`${INGREDIENT_TO_ADD}`);
+                    expect(res.body.step).toBe(`${STEP._id}`);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.ingredients.length).toBe(2);
+                            expect(step.ingredients[1]).toEqual(INGREDIENT_TO_ADD);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
         });
 
         it('should update step by removing one ingredient linked', (done) => {
-
+            done();
         });
 
         it('should not update description with invalid id', (done) => {
-
+            done();
         });
 
         it('should not update description with valid id but non-existence step', (done) => {
-
+            done();
         });
 
     });
