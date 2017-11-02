@@ -654,7 +654,7 @@ describe('Steps tests', () => {
                 .expect(200)
                 .expect((res) => {
                     expect(res.body.message).toBe("Step ingredients updated.");
-                    expect(res.body.ingredients[0]).toBe(`${INGREDIENT_TO_ADD}`);
+                    expect(res.body.added[0]).toBe(`${INGREDIENT_TO_ADD}`);
                     expect(res.body.step._id).toBe(`${STEP._id}`);
                 })
                 .end((error) => {
@@ -671,7 +671,27 @@ describe('Steps tests', () => {
         });
 
         it('should update step by removing one ingredient linked', (done) => {
-            done();
+            const INGREDIENT_TO_REMOVE = INGREDIENTS[0]._id;
+
+            request(server)
+                .patch(`/step/${STEP._id}`)
+                .send({ remove: [INGREDIENT_TO_REMOVE] })
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step ingredients updated.");
+                    expect(res.body.removed[0]).toBe(`${INGREDIENT_TO_REMOVE}`);
+                    expect(res.body.step._id).toBe(`${STEP._id}`);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.ingredients.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
         });
 
         it('should not update description with invalid id', (done) => {
