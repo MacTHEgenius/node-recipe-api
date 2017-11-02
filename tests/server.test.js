@@ -595,6 +595,72 @@ describe('Steps tests', () => {
 
     describe('PATCH /step/:id', () => {
 
+        const STEP = STEPS[0];
+        const NEW_DESCRIPTION = { description: "Step 1 updated." };
+        const NEW_POSITION = { position: 2 };
+
+        it('should update description', (done) => {
+            request(server)
+                .patch(`/steps/${STEP._id}`)
+                .send(NEW_DESCRIPTION)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step successfully updated.");
+                    expect(res.body.step.description).toBe(NEW_DESCRIPTION.description);
+                    expect(res.body.step.position).toBe(STEP.position);
+                })
+                .end((error) => {
+                    if (error) done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.description).toBe(NEW_DESCRIPTION.description);
+                            expect(step.position).toBe(STEP.position);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should update position', (done) => {
+            request(server)
+                .patch(`/steps/${STEP._id}`)
+                .send(NEW_POSITION)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step successfully updated.");
+                    expect(res.body.step.position).toBe(NEW_POSITION.position);
+                    expect(res.body.step.description).toBe(STEP.description);
+                })
+                .end((error) => {
+                    if (error) done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.position).toBe(NEW_POSITION.position);
+                            expect(step.description).toBe(STEP.description);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should update step by adding one ingredient', (done) => {
+
+        });
+
+        it('should update step by removing one ingredient linked', (done) => {
+
+        });
+
+        it('should not update description with invalid id', (done) => {
+
+        });
+
+        it('should not update description with valid id but non-existence step', (done) => {
+
+        });
+
     });
 
     describe('DELETE /step/:id', () => {
