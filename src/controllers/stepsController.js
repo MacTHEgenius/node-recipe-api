@@ -8,7 +8,7 @@ let getAll = (req, res) => {
 };
 
 /**
- * Update fields and ingrdients array. Updating, adding and removing are 1 request each.
+ * Update fields and ingrdients array. Updating, adding and removing can be in 1 request.
  * @param req
  * @param res
  */
@@ -16,28 +16,23 @@ let update = (req, res) => {
     let id = req.params.id;
     let data = req.body;
 
-    if (data.add) {
-        Step.findById(id)
-            .then((step) => {
+    Step.findById(id)
+        .then((step) => {
+            if (data.add) {
                 step.ingredients.push(data.add);
-                step.save()
-                    .then(() => {
-                        let response = {
-                            message: "Ingredients added.", ingredients: data.add, step: id
-                        };
-                        res.status(200).send(response);
-                    });
-            })
-            .catch((e) => res.status(500).send(e));
-    } else {
-        Step.findByIdAndUpdate(id, { $set: data }, { new: true })
-            .then((step) => {
-                let response = {
-                    message: "Step successfully updated.", step: step
-                };
-                res.status(200).send(response);
-            });
-    }
+            }
+
+            step.set(data);
+            step.save((error, step) => {
+                    let response = { message: "Step successfully updated.", step: step };
+                    if (data.add) {
+                        response.message = "Step ingredients updated.";
+                        response.ingredients = data.add;
+                    }
+                    res.status(200).send(response);
+                })
+        })
+        .catch((e) => res.status(500).send(e));
 };
 
 

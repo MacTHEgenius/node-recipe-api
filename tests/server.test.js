@@ -653,9 +653,9 @@ describe('Steps tests', () => {
                 .send({ add: [INGREDIENT_TO_ADD] })
                 .expect(200)
                 .expect((res) => {
-                    expect(res.body.message).toBe("Ingredients added.");
+                    expect(res.body.message).toBe("Step ingredients updated.");
                     expect(res.body.ingredients[0]).toBe(`${INGREDIENT_TO_ADD}`);
-                    expect(res.body.step).toBe(`${STEP._id}`);
+                    expect(res.body.step._id).toBe(`${STEP._id}`);
                 })
                 .end((error) => {
                     if (error) return done(error);
