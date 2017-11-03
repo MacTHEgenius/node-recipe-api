@@ -695,11 +695,47 @@ describe('Steps tests', () => {
         });
 
         it('should not update description with invalid id', (done) => {
-            done();
+            request(server)
+                .patch('/step/1')
+                .send(NEW_DESCRIPTION)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step not found.");
+                    expect(res.body.error).toBe(true);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.description).toBe(STEP.description);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
         });
 
         it('should not update description with valid id but non-existence step', (done) => {
-            done();
+            const VALID_ID = new ObjectID();
+
+            request(server)
+                .patch(`/step/${VALID_ID}`)
+                .send(NEW_DESCRIPTION)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step not found.");
+                    expect(res.body.error).toBe(true);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.description).toBe(STEP.description);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
         });
 
     });

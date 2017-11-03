@@ -1,5 +1,7 @@
 const Step = require('./../models/Step');
 
+const { ObjectId } = require('mongodb');
+
 
 let getAll = (req, res) => {
     Step.find()
@@ -13,11 +15,16 @@ let getAll = (req, res) => {
  * @param res
  */
 let update = (req, res) => {
+    let errorResponse = { message: "Step not found.", error: true };
     let id = req.params.id;
     let data = req.body;
 
+    if (!ObjectId.isValid(id)) return res.status(404).send(errorResponse);
+
     Step.findById(id)
         .then((step) => {
+            if (!step) return res.status(404).send(errorResponse);
+
             if (data.add) {
                 step.ingredients.push(data.add);
             }
