@@ -5,7 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "mocha tests/**/*.test.js"
+    "test": "mocha tests/**"
   },
   "author": "MacTHEgenius",
   "license": "ISC",

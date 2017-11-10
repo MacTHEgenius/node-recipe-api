@@ -5,6 +5,7 @@ const {ObjectID} = require('mongodb');
 const {server} = require('./../src/server');
 const Recipe = require('./../src/models/Recipe');
 const Ingredient = require('./../src/models/Ingredient');
+const Step = require('./../src/models/Step');
 
 const RECIPES = [
     {_id: new ObjectID(), name: "My first recipe", description: "My first description"},
@@ -14,21 +15,27 @@ const RECIPES = [
 
 const INGREDIENTS = [
     {_id: new ObjectID(), name: "flour", count: 2, measure: "cup", recipe: RECIPES[0]._id},
-    {_id: new ObjectID(), name: "cocoa", count: 3, measure: "tablespoon", recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), name: "cocoa", count: 3, measure: "tbsp", recipe: RECIPES[0]._id},
     {_id: new ObjectID(), name: "potato", count: 4, measure: "item", recipe: RECIPES[1]._id},
+];
+
+const STEPS = [
+    {_id: new ObjectID(), description: "Step 1", position: 1, ingredients: [INGREDIENTS[0]._id], recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), description: "Step 2", position: 2, ingredients: [INGREDIENTS[1]._id], recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), description: "Step 1", position: 1, ingredients: [INGREDIENTS[2]._id], recipe: RECIPES[1]._id},
 ];
 
 beforeEach((done) => {
     Recipe.remove({})
-        .then(() => {
-            return Recipe.insertMany(RECIPES)
-        })
+        .then(() => { return Recipe.insertMany(RECIPES); })
         .then(() => {
             Ingredient.remove({})
+                .then(() => { return Ingredient.insertMany(INGREDIENTS); })
                 .then(() => {
-                    return Ingredient.insertMany(INGREDIENTS)
-                })
-                .then(() => done());
+                    Step.remove({})
+                        .then(() => { return Step.insertMany(STEPS); })
+                        .then(() => done());
+                });
         });
 });
 
@@ -168,6 +175,11 @@ describe('Recipes tests', () => {
                     });
                 });
         });
+
+        it('should delete all ingredients and steps linked', (done) => {
+            // TODO: should delete all ingredients and steps linked
+            done();
+        })
 
     });
 
@@ -558,6 +570,185 @@ describe('Ingredients tests', () => {
                 })
                 .end(done);
         });
+
+    });
+
+});
+
+/* Steps */
+
+describe('Steps tests', () => {
+
+    describe('GET /steps', () => {
+
+        it('should get all steps', (done) => {
+            request(server)
+                .get('/steps')
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.length).toBe(3);
+                })
+                .end(done);
+        });
+
+    });
+
+    describe('PATCH /step/:id', () => {
+
+        const STEP = STEPS[0];
+        const NEW_DESCRIPTION = { description: "Step 1 updated." };
+        const NEW_POSITION = { position: 2 };
+
+        it('should update description', (done) => {
+            request(server)
+                .patch(`/step/${STEP._id}`)
+                .send(NEW_DESCRIPTION)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step successfully updated.");
+                    expect(res.body.step.description).toBe(NEW_DESCRIPTION.description);
+                    expect(res.body.step.position).toBe(STEP.position);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.description).toBe(NEW_DESCRIPTION.description);
+                            expect(step.position).toBe(STEP.position);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should update position', (done) => {
+            request(server)
+                .patch(`/step/${STEP._id}`)
+                .send(NEW_POSITION)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step successfully updated.");
+                    expect(res.body.step.position).toBe(NEW_POSITION.position);
+                    expect(res.body.step.description).toBe(STEP.description);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.position).toBe(NEW_POSITION.position);
+                            expect(step.description).toBe(STEP.description);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should update step by adding one ingredient', (done) => {
+            const INGREDIENT_TO_ADD = INGREDIENTS[1]._id;
+
+            request(server)
+                .patch(`/step/${STEP._id}`)
+                .send({ add: [INGREDIENT_TO_ADD] })
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step ingredients updated.");
+                    expect(res.body.added[0]).toBe(`${INGREDIENT_TO_ADD}`);
+                    expect(res.body.step._id).toBe(`${STEP._id}`);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.ingredients.length).toBe(2);
+                            expect(step.ingredients[1]).toEqual(INGREDIENT_TO_ADD);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should update step by removing one ingredient linked', (done) => {
+            const INGREDIENT_TO_REMOVE = INGREDIENTS[0]._id;
+
+            request(server)
+                .patch(`/step/${STEP._id}`)
+                .send({ remove: [INGREDIENT_TO_REMOVE] })
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step ingredients updated.");
+                    expect(res.body.removed[0]).toBe(`${INGREDIENT_TO_REMOVE}`);
+                    expect(res.body.step._id).toBe(`${STEP._id}`);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.ingredients.length).toBe(0);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should not update description with invalid id', (done) => {
+            request(server)
+                .patch('/step/1')
+                .send(NEW_DESCRIPTION)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step not found.");
+                    expect(res.body.error).toBe(true);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.description).toBe(STEP.description);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+        it('should not update description with valid id but non-existence step', (done) => {
+            const VALID_ID = new ObjectID();
+
+            request(server)
+                .patch(`/step/${VALID_ID}`)
+                .send(NEW_DESCRIPTION)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.message).toBe("Step not found.");
+                    expect(res.body.error).toBe(true);
+                })
+                .end((error) => {
+                    if (error) return done(error);
+
+                    Step.findById(STEP._id)
+                        .then((step) => {
+                            expect(step.description).toBe(STEP.description);
+                            done();
+                        })
+                        .catch((e) => done(e));
+                });
+        });
+
+    });
+
+    describe('DELETE /step/:id', () => {
+
+    });
+
+    describe('GET /recipe/steps/:recipe_id', () => {
+
+    });
+
+    describe('POST /recipe/step/:recipe_id', () => {
 
     });
 

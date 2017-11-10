@@ -7,3 +7,6 @@ data/
 # Idea ignored file
 .idea/
 /0
+
+# macOS ignored files
+.DS_Store
