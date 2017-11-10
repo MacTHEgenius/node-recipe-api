@@ -15,7 +15,7 @@ const RECIPES = [
 
 const INGREDIENTS = [
     {_id: new ObjectID(), name: "flour", count: 2, measure: "cup", recipe: RECIPES[0]._id},
-    {_id: new ObjectID(), name: "cocoa", count: 3, measure: "tablespoon", recipe: RECIPES[0]._id},
+    {_id: new ObjectID(), name: "cocoa", count: 3, measure: "tbsp", recipe: RECIPES[0]._id},
     {_id: new ObjectID(), name: "potato", count: 4, measure: "item", recipe: RECIPES[1]._id},
 ];
 
