@@ -47,6 +47,8 @@ server.post('/recipe/ingredient/:recipe_id', ingredientController.create);
 server.get('/steps', stepsController.getAll);
 server.patch('/step/:id', stepsController.update);
 
+server.get('/recipe/steps/:recipe_id', stepsController.getStepsFromRecipe);
+
 // Listening
 server.listen(port, ip, () => {
     console.log(`Server started at ${ip}:${port}`);

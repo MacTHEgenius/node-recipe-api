@@ -221,7 +221,7 @@ describe('Ingredients tests', () => {
                 .expect(404)
                 .expect((res) => {
                     expect(res.body.error).toBe(true);
-                    expect(res.body.message).toBe("Recipe not found.")
+                    expect(res.body.message).toBe("Recipe not found.");
                 })
                 .end(done);
         });
@@ -745,6 +745,42 @@ describe('Steps tests', () => {
     });
 
     describe('GET /recipe/steps/:recipe_id', () => {
+
+        const RECIPE = RECIPES[0];
+        const STEPS_FOR_RECIPE = STEPS.filter((i) => i.recipe == RECIPE._id);
+        
+        it('should get steps for recipe', (done) => {
+            request(server)
+                .get(`/recipe/steps/${RECIPE._id}`)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.length).toBe(STEPS_FOR_RECIPE.length);
+                })
+                .end(done);
+        });
+        
+        it('should not get steps for recipe with invalid id', (done) => {
+            request(server)
+                .get(`/recipe/steps/1`)
+                .expect(404)
+                .expect((res) => {
+                    expect(res.body.error).toBe(true);
+                    expect(res.body.message).toBe("Recipe not found.");
+                })
+                .end(done);
+        });
+        
+        it('should not get steps for recipe with valid bu non-existing id', (done) => {
+            const VALID_ID = new ObjectID();
+
+            request(server)
+                .get(`/recipe/steps/${VALID_ID}`)
+                .expect(200)
+                .expect((res) => {
+                    expect(res.body.length).toBe(0);
+                })
+                .end(done);
+        });
 
     });
 

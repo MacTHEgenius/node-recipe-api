@@ -9,6 +9,24 @@ let getAll = (req, res) => {
         .catch((e) => res.status(500).send(e));
 };
 
+let getStepsFromRecipe = (req, res) => {
+    const recipeId = req.params.recipe_id;
+
+    if (!ObjectId.isValid(recipeId)) {
+        let response = {
+            message: "Recipe not found.", error: true
+        };
+        return res.status(404).send(response);
+    }
+
+    Step.find({ recipe: recipeId })
+        .then((steps) => {
+            res.status(200).send(steps);
+        })
+        .catch((e) => res.status(500).send(e));
+    // res.status(501).send({ error: "Not implemented." });
+};
+
 /**
  * Update fields and ingrdients array. Updating, adding and removing can be in 1 request.
  * @param req
@@ -57,5 +75,5 @@ let update = (req, res) => {
 
 
 module.exports = {
-    getAll, update
+    getAll, update, getStepsFromRecipe
 };
